@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sports Nut — Cover Notes</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  
+  body {
+    font-family: 'Arial', sans-serif;
+    background: #1a1a1a;
+    color: #2B2B2B;
+    min-height: 100vh;
+  }
+
+  .header {
+    background: #2B2B2B;
+    padding: 16px 20px;
+    text-align: center;
+  }
+
+  .header h1 {
+    color: white;
+    font-size: 20px;
+    letter-spacing: 1px;
+  }
+
+  .header p {
+    color: #41B8E8;
+    font-size: 12px;
+    margin-top: 4px;
+  }
+
+  .container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 16px;
+  }
+
+  .card {
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  }
+
+  .card-title {
+    font-size: 13px;
+    font-weight: bold;
+    color: #E8453C;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 14px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #E8453C;
+  }
+
+  .field {
+    margin-bottom: 14px;
+  }
+
+  label {
+    display: block;
+    font-size: 12px;
+    font-weight: bold;
+    color: #555;
+    margin-bottom: 5px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  input, select, textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 2px solid #e0e0e0;
+    border-radius: 6px;
+    font-size: 15px;
+    font-family: Arial, sans-serif;
+    color: #2B2B2B;
+    transition: border-color 0.2s;
+    -webkit-appearance: none;
+  }
+
+  input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: #41B8E8;
+  }
+
+  textarea {
+    height: 100px;
+    resize: vertical;
+  }
+
+  /* Autocomplete */
+  .autocomplete-wrapper {
+    position: relative;
+  }
+
+  .autocomplete-list {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border: 2px solid #41B8E8;
+    border-top: none;
+    border-radius: 0 0 6px 6px;
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 100;
+    display: none;
+  }
+
+  .autocomplete-item {
+    padding: 10px 12px;
+    cursor: pointer;
+    font-size: 15px;
+    border-bottom: 1px solid #f0f0f0;
+  }
+
+  .autocomplete-item:hover, .autocomplete-item.selected {
+    background: #EBF5FB;
+    color: #2B2B2B;
+  }
+
+  .autocomplete-item:last-child {
+    border-bottom: none;
+  }
+
+  /* Lesson blocks */
+  .lesson-block {
+    background: #f9f9f9;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 12px;
+    position: relative;
+  }
+
+  .lesson-block.filled {
+    border-color: #41B8E8;
+  }
+
+  .lesson-num {
+    font-size: 11px;
+    font-weight: bold;
+    color: white;
+    background: #2B2B2B;
+    padding: 3px 8px;
+    border-radius: 4px;
+    display: inline-block;
+    margin-bottom: 12px;
+  }
+
+  .lesson-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+
+  .strength-buttons {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 6px;
+  }
+
+  .strength-btn {
+    padding: 8px 4px;
+    border: 2px solid #e0e0e0;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: bold;
+    cursor: pointer;
+    text-align: center;
+    background: white;
+    transition: all 0.2s;
+    -webkit-appearance: none;
+    width: 100%;
+  }
+
+  .strength-btn.snstrong { color: #1E7E34; border-color: #1E7E34; }
+  .strength-btn.snstrong.active { background: #1E7E34; color: white; }
+  .strength-btn.snmedium { color: #856404; border-color: #856404; }
+  .strength-btn.snmedium.active { background: #856404; color: white; }
+  .strength-btn.snweak { color: #CC0000; border-color: #CC0000; }
+  .strength-btn.snweak.active { background: #CC0000; color: white; }
+
+  .add-lesson-btn {
+    width: 100%;
+    padding: 12px;
+    background: #f0f0f0;
+    border: 2px dashed #ccc;
+    border-radius: 8px;
+    font-size: 14px;
+    color: #666;
+    cursor: pointer;
+    text-align: center;
+    margin-bottom: 16px;
+  }
+
+  .add-lesson-btn:hover {
+    background: #e8e8e8;
+    border-color: #41B8E8;
+    color: #41B8E8;
+  }
+
+  .submit-btn {
+    width: 100%;
+    padding: 16px;
+    background: #E8453C;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    letter-spacing: 0.5px;
+    margin-bottom: 20px;
+  }
+
+  .submit-btn:hover { background: #c73530; }
+  .submit-btn:disabled { background: #ccc; cursor: not-allowed; }
+
+  .success-msg {
+    display: none;
+    background: #D4EDDA;
+    color: #1E7E34;
+    padding: 16px;
+    border-radius: 8px;
+    text-align: center;
+    font-weight: bold;
+    margin-bottom: 16px;
+  }
+
+  .error-msg {
+    display: none;
+    background: #FFECEC;
+    color: #CC0000;
+    padding: 16px;
+    border-radius: 8px;
+    text-align: center;
+    font-weight: bold;
+    margin-bottom: 16px;
+  }
+
+  .time-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+  }
+
+  .time-btn {
+    padding: 8px 4px;
+    border: 2px solid #e0e0e0;
+    border-radius: 6px;
+    font-size: 13px;
+    cursor: pointer;
+    text-align: center;
+    background: white;
+    transition: all 0.2s;
+    -webkit-appearance: none;
+    width: 100%;
+  }
+
+  .time-btn.active {
+    background: #2B2B2B;
+    color: white;
+    border-color: #2B2B2B;
+  }
+
+  .time-btn:hover:not(.active) {
+    border-color: #41B8E8;
+    color: #41B8E8;
+  }
+
+  .no-times {
+    color: #888;
+    font-size: 13px;
+    font-style: italic;
+    padding: 8px 0;
+  }
+
+  .password-screen {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: #1a1a1a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+  }
+
+  .password-card {
+    background: white;
+    border-radius: 12px;
+    padding: 32px 28px;
+    width: 90%;
+    max-width: 360px;
+    text-align: center;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+  }
+
+  .password-card h2 {
+    font-size: 18px;
+    color: #2B2B2B;
+    margin-bottom: 6px;
+  }
+
+  .password-card p {
+    font-size: 13px;
+    color: #888;
+    margin-bottom: 20px;
+  }
+
+  .password-card input {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #e0e0e0;
+    border-radius: 6px;
+    font-size: 16px;
+    text-align: center;
+    letter-spacing: 2px;
+    margin-bottom: 12px;
+  }
+
+  .password-card input:focus {
+    outline: none;
+    border-color: #41B8E8;
+  }
+
+  .password-card button {
+    width: 100%;
+    padding: 12px;
+    background: #E8453C;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 15px;
+    font-weight: bold;
+    cursor: pointer;
+  }
+
+  .password-card button:hover { background: #c73530; }
+
+  .password-error {
+    color: #CC0000;
+    font-size: 13px;
+    margin-top: 8px;
+    display: none;
+  }
+
+  .main-content { display: none; }
+</style>
+</head>
+<body>
+
+
+<div class="password-screen" id="passwordScreen">
+  <div class="password-card">
+    <h2>Sports Nut</h2>
+    <p>Cover Notes — Staff Access Only</p>
+    <input type="password" id="passwordInput" placeholder="Enter password" 
+           onkeydown="if(event.key==='Enter')checkPassword()">
+    <button onclick="checkPassword()">ACCESS FORM</button>
+    <div class="password-error" id="passwordError">Incorrect password. Please try again.</div>
+  </div>
+</div>
+
+<div class="main-content" id="mainContent">
+<div class="header">
+  <h1>SPORTS NUT</h1>
+  <p>Cover Notes Submission</p>
+</div>
+
+<div class="container">
+
+  <div class="success-msg" id="successMsg">
+    ✅ Cover notes submitted successfully! Mark has been notified.
+  </div>
+  <div class="error-msg" id="errorMsg">
+    ❌ Something went wrong. Please try again or contact Mark directly.
+  </div>
+
+  <!-- SESSION DETAILS -->
+  <div class="card">
+    <div class="card-title">Session Details</div>
+
+    <div class="field">
+      <label>Your Name</label>
+      <div class="autocomplete-wrapper">
+        <input type="text" id="teacherInput" placeholder="Start typing your name..." autocomplete="off">
+        <div class="autocomplete-list" id="autocompleteList"></div>
+      </div>
+      <input type="hidden" id="teacherName">
+    </div>
+
+    <div class="field">
+      <label>Date</label>
+      <input type="date" id="lessonDate">
+    </div>
+
+    <div class="field">
+      <label>Venue</label>
+      <select id="venue">
+        <option value="">— Select venue —</option>
+        <option value="Davenies">Davenies School, Beaconsfield</option>
+        <option value="Godstowe">Godstowe School, High Wycombe</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- LESSONS -->
+  <div class="card">
+    <div class="card-title">Lessons</div>
+    <div id="lessonsContainer"></div>
+    <button class="add-lesson-btn" onclick="addLesson()" id="addLessonBtn">+ Add another lesson</button>
+  </div>
+
+  <!-- SUBMIT -->
+  <button class="submit-btn" onclick="submitForm()" id="submitBtn">SUBMIT COVER NOTES</button>
+
+</div>
+
+<script>
+// ── DATA ──────────────────────────────────────────────────────────────────────
+const TEACHERS = [
+  "Amina Imansoura","Chris Pollard","Christy Otway","Ellie Melrose",
+  "Emma Hamilton","Gabby Morris","Hannah Eddy","June Freebody",
+  "Kasia Jarmoszynska","Kate Ridden","Katie Hall","Karolyn Nailard",
+  "Korrie Ford","Laura Evans","Lindsey Collinson","Maisy Howard",
+  "Mark Tennant","Mecaela Allen","Norbert Mandic","Oliver Vine",
+  "Paige Morgan","Pippa Davie","Rachel Cornford","Rebecca Tennant",
+  "Rebekah Bradley","Reshaun Willis","Salil Kulkarni","Sian Lipscomb",
+  "Sophie Clayton"
+];
+
+const TIMES = {
+  Davenies: {
+    Monday:    ['17:30','18:00','18:35','19:05','19:35','20:05'],
+    Tuesday:   ['17:30','18:00','18:35','19:05','19:35','20:05'],
+    Wednesday: ['17:30','18:00','18:35','19:05','19:35','20:05'],
+    Thursday:  ['17:30','18:00','18:35','19:05','19:35','20:05'],
+    Friday:    ['17:30','18:00','18:35','19:05','19:35','20:05'],
+    Saturday:  ['08:30','09:00','09:30','10:00','10:30','11:05','11:35','12:10','12:40','13:10'],
+    Sunday:    ['10:35','11:05','11:35','12:05','12:35','13:45','14:15','19:05','20:05'],
+  },
+  Godstowe: {
+    Tuesday:   ['16:30','17:00','17:30','18:00','18:05','18:35','19:05','19:35','20:05'],
+    Friday:    ['16:30','17:00','17:30','18:00','18:35','19:05','19:35','20:05'],
+    Saturday:  ['08:40','09:15','09:45','10:15','10:45','11:15','11:50','12:20','12:50','12:55','13:25'],
+    Sunday:    ['09:40','10:10','10:15','10:45','11:15','11:45','12:15','12:45'],
+  }
+};
+
+const LEVELS = ['L1','L2','L3','L4','L5','L6','L7','L8','Squad'];
+const DAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+
+// Google Apps Script URL — replace with your deployed script URL
+const SCRIPT_URL = 'REPLACE_WITH_YOUR_GOOGLE_APPS_SCRIPT_URL';
+
+// ── STATE ─────────────────────────────────────────────────────────────────────
+let lessonCount = 0;
+let selectedTeacher = '';
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  // Add first lesson block
+  addLesson();
+
+  // Venue/date change → refresh time buttons
+  document.getElementById('venue').addEventListener('change', refreshAllTimePickers);
+  document.getElementById('lessonDate').addEventListener('change', refreshAllTimePickers);
+});
+
+// ── AUTOCOMPLETE ──────────────────────────────────────────────────────────────
+const teacherInput = document.getElementById('teacherInput');
+const autocompleteList = document.getElementById('autocompleteList');
+
+teacherInput.addEventListener('input', () => {
+  const val = teacherInput.value.toLowerCase();
+  autocompleteList.innerHTML = '';
+  if (!val) { autocompleteList.style.display = 'none'; return; }
+  
+  const matches = TEACHERS.filter(t => t.toLowerCase().includes(val));
+  if (matches.length === 0) { autocompleteList.style.display = 'none'; return; }
+  
+  matches.forEach(name => {
+    const div = document.createElement('div');
+    div.className = 'autocomplete-item';
+    div.textContent = name;
+    div.addEventListener('click', () => {
+      teacherInput.value = name;
+      selectedTeacher = name;
+      document.getElementById('teacherName').value = name;
+      autocompleteList.style.display = 'none';
+    });
+    autocompleteList.appendChild(div);
+  });
+  autocompleteList.style.display = 'block';
+});
+
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('.autocomplete-wrapper')) {
+    autocompleteList.style.display = 'none';
+  }
+});
+
+// ── LESSONS ───────────────────────────────────────────────────────────────────
+function addLesson() {
+  lessonCount++;
+  const id = lessonCount;
+  const container = document.getElementById('lessonsContainer');
+  
+  const block = document.createElement('div');
+  block.className = 'lesson-block';
+  block.id = `lesson-${id}`;
+  block.innerHTML = `
+    <div class="lesson-num">LESSON ${id}</div>
+    
+    <div class="field">
+      <label>Time</label>
+      <div class="time-grid" id="timeGrid-${id}">
+        <div class="no-times">Select venue and date first</div>
+      </div>
+      <input type="hidden" id="time-${id}">
+    </div>
+
+    <div class="lesson-row">
+      <div class="field">
+        <label>Level</label>
+        <select id="level-${id}">
+          <option value="">— Select —</option>
+          ${LEVELS.map(l => `<option value="${l}">${l}</option>`).join('')}
+        </select>
+      </div>
+      <div class="field">
+        <label>Class Strength</label>
+        <div class="strength-buttons">
+          <button class="strength-btn snstrong" onclick="setStrength(${id},'STRONG',this)">STRONG</button>
+          <button class="strength-btn snmedium" onclick="setStrength(${id},'MEDIUM',this)">MEDIUM</button>
+          <button class="strength-btn snweak" onclick="setStrength(${id},'WEAK',this)">WEAK</button>
+        </div>
+        <input type="hidden" id="strength-${id}">
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Cover Notes</label>
+      <textarea id="notes-${id}" placeholder="Notes about this class for the cover teacher..."></textarea>
+    </div>
+  `;
+  
+  container.appendChild(block);
+  renderTimePicker(id);
+}
+
+function setStrength(id, value, btn) {
+  document.querySelectorAll(`#lesson-${id} .strength-btn`).forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById(`strength-${id}`).value = value;
+}
+
+function getSelectedDay() {
+  const dateVal = document.getElementById('lessonDate').value;
+  if (!dateVal) return null;
+  const d = new Date(dateVal + 'T00:00:00');
+  return DAYS[d.getDay()];
+}
+
+function renderTimePicker(id) {
+  const venue = document.getElementById('venue').value;
+  const day = getSelectedDay();
+  const grid = document.getElementById(`timeGrid-${id}`);
+  const currentTime = document.getElementById(`time-${id}`).value;
+  
+  if (!venue || !day) {
+    grid.innerHTML = '<div class="no-times">Select venue and date first</div>';
+    return;
+  }
+  
+  const times = (TIMES[venue] && TIMES[venue][day]) ? TIMES[venue][day] : null;
+  
+  if (!times) {
+    grid.innerHTML = `<div class="no-times">No lessons at ${venue} on ${day}</div>`;
+    return;
+  }
+  
+  grid.innerHTML = times.map(t => `
+    <button class="time-btn${t === currentTime ? ' active' : ''}" 
+            onclick="selectTime(${id},'${t}',this)">${t}</button>
+  `).join('');
+}
+
+function selectTime(id, time, btn) {
+  document.querySelectorAll(`#timeGrid-${id} .time-btn`).forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById(`time-${id}`).value = time;
+  document.getElementById(`lesson-${id}`).classList.add('filled');
+}
+
+function refreshAllTimePickers() {
+  for (let i = 1; i <= lessonCount; i++) {
+    if (document.getElementById(`lesson-${i}`)) {
+      renderTimePicker(i);
+    }
+  }
+}
+
+// ── SUBMIT ────────────────────────────────────────────────────────────────────
+async function submitForm() {
+  const teacher = document.getElementById('teacherName').value || teacherInput.value;
+  const date = document.getElementById('lessonDate').value;
+  const venue = document.getElementById('venue').value;
+  
+  if (!teacher) { alert('Please select your name.'); return; }
+  if (!date) { alert('Please select a date.'); return; }
+  if (!venue) { alert('Please select a venue.'); return; }
+  
+  // Collect lessons
+  const lessons = [];
+  for (let i = 1; i <= lessonCount; i++) {
+    if (!document.getElementById(`lesson-${i}`)) continue;
+    const time = document.getElementById(`time-${i}`).value;
+    const level = document.getElementById(`level-${i}`).value;
+    const strength = document.getElementById(`strength-${i}`).value;
+    const notes = document.getElementById(`notes-${i}`).value;
+    
+    if (time || level || notes) {
+      lessons.push({ time, level, strength, notes });
+    }
+  }
+  
+  if (lessons.length === 0) { alert('Please fill in at least one lesson.'); return; }
+  
+  const missing = lessons.filter(l => !l.time || !l.level);
+  if (missing.length > 0) { alert('Please select a time and level for each lesson.'); return; }
+  
+  const submitBtn = document.getElementById('submitBtn');
+  submitBtn.disabled = true;
+  submitBtn.textContent = 'Submitting...';
+  
+  const payload = { teacher, date, venue, lessons };
+  
+  try {
+    await fetch(SCRIPT_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    
+    document.getElementById('successMsg').style.display = 'block';
+    submitBtn.style.display = 'none';
+    window.scrollTo(0, 0);
+  } catch (err) {
+    document.getElementById('errorMsg').style.display = 'block';
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'SUBMIT COVER NOTES';
+  }
+}
+
+function checkPassword() {
+  const input = document.getElementById('passwordInput').value;
+  if (input === 'SportsNut2026') {
+    document.getElementById('passwordScreen').style.display = 'none';
+    document.getElementById('mainContent').style.display = 'block';
+    // Re-init date now that main content is visible
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    const dd = String(today.getDate()).padStart(2, '0');
+    const dateField = document.getElementById('lessonDate');
+    if (dateField) dateField.value = `${yyyy}-${mm}-${dd}`;
+  } else {
+    document.getElementById('passwordError').style.display = 'block';
+    document.getElementById('passwordInput').value = '';
+    document.getElementById('passwordInput').focus();
+  }
+}
+
+</script>
+</div>
+</body>
+</html>
