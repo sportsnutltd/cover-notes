@@ -276,6 +276,57 @@
     color: #41B8E8;
   }
 
+  .pool-auto-label {
+    padding: 10px 12px;
+    border: 2px solid #e0e0e0;
+    border-radius: 6px;
+    font-size: 15px;
+    color: #888;
+    font-style: italic;
+    background: #f9f9f9;
+    min-height: 42px;
+    display: flex;
+    align-items: center;
+  }
+
+  .pool-auto-label.set {
+    color: #2B2B2B;
+    font-style: normal;
+    font-weight: bold;
+    background: #EBF5FB;
+    border-color: #41B8E8;
+  }
+
+  .pool-choice-buttons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .pool-choice-btn {
+    padding: 10px 8px;
+    border: 2px solid #e0e0e0;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: bold;
+    cursor: pointer;
+    text-align: center;
+    background: white;
+    transition: all 0.2s;
+    color: #2B2B2B;
+  }
+
+  .pool-choice-btn.active {
+    background: #2B2B2B;
+    color: white;
+    border-color: #2B2B2B;
+  }
+
+  .pool-choice-btn:hover:not(.active) {
+    border-color: #41B8E8;
+    color: #41B8E8;
+  }
+
   .no-times {
     color: #888;
     font-size: 13px;
@@ -459,7 +510,7 @@ const LEVELS = ['L1','L2','L3','L4','L5','L6','L7','L8','Squad'];
 const DAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
 
 // Google Apps Script URL — replace with your deployed script URL
-const SCRIPT_URL = 'REPLACE_WITH_YOUR_GOOGLE_APPS_SCRIPT_URL';
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzLkjQpnJHMNEX4tADPMNN7zC_eLR5x2I8Uijp6QPxs-y-VBO5xYhaXRIE3tBaA3rwDNg/exec';
 
 // ── STATE ─────────────────────────────────────────────────────────────────────
 let lessonCount = 0;
@@ -531,7 +582,7 @@ function addLesson() {
     <div class="lesson-row">
       <div class="field">
         <label>Level</label>
-        <select id="level-${id}">
+        <select id="level-${id}" onchange="updatePoolArea(${id})">
           <option value="">— Select —</option>
           ${LEVELS.map(l => `<option value="${l}">${l}</option>`).join('')}
         </select>
@@ -601,6 +652,55 @@ function selectTime(id, time, btn) {
   document.getElementById(`lesson-${id}`).classList.add('filled');
 }
 
+function updatePoolArea(id) {
+  const level = document.getElementById(`level-${id}`).value;
+  const display = document.getElementById(`poolAreaDisplay-${id}`);
+  const choice = document.getElementById(`poolAreaChoice-${id}`);
+  const hidden = document.getElementById(`poolArea-${id}`);
+
+  if (!level) {
+    display.textContent = 'Select a level first';
+    display.className = 'pool-auto-label';
+    choice.style.display = 'none';
+    hidden.value = '';
+    return;
+  }
+
+  // Auto-assign pool area based on level
+  if (level === 'L1' || level === 'L2') {
+    display.textContent = 'SHALLOW (auto)';
+    display.className = 'pool-auto-label set';
+    choice.style.display = 'none';
+    hidden.value = 'SHALLOW';
+  } else if (level === 'L3') {
+    display.textContent = 'SHELF (auto)';
+    display.className = 'pool-auto-label set';
+    choice.style.display = 'none';
+    hidden.value = 'SHELF';
+  } else if (level === 'L4') {
+    display.textContent = '';
+    display.className = 'pool-auto-label';
+    display.style.display = 'none';
+    choice.style.display = 'grid';
+    hidden.value = '';
+    // Clear any previous selection
+    document.querySelectorAll(`#poolAreaChoice-${id} .pool-choice-btn`).forEach(b => b.classList.remove('active'));
+  } else {
+    // L5, L6, L7, L8, Squad
+    display.textContent = 'LENGTH (auto)';
+    display.className = 'pool-auto-label set';
+    display.style.display = 'flex';
+    choice.style.display = 'none';
+    hidden.value = 'LENGTH';
+  }
+}
+
+function selectPoolChoice(id, value, btn) {
+  document.querySelectorAll(`#poolAreaChoice-${id} .pool-choice-btn`).forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById(`poolArea-${id}`).value = value;
+}
+
 function refreshAllTimePickers() {
   for (let i = 1; i <= lessonCount; i++) {
     if (document.getElementById(`lesson-${i}`)) {
@@ -628,8 +728,9 @@ async function submitForm() {
     const strength = document.getElementById(`strength-${i}`).value;
     const notes = document.getElementById(`notes-${i}`).value;
     
+    const poolArea = document.getElementById(`poolArea-${i}`).value;
     if (time || level || notes) {
-      lessons.push({ time, level, strength, notes });
+      lessons.push({ time, level, strength, poolArea, notes });
     }
   }
   
