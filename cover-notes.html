@@ -769,11 +769,6 @@ async function submitForm() {
     return;
   }
   
-  if (lessons.length === 0) { alert('Please fill in at least one lesson.'); return; }
-  
-  const missing = lessons.filter(l => !l.time || !l.level);
-  if (missing.length > 0) { alert('Please select a time and level for each lesson.'); return; }
-  
   const submitBtn = document.getElementById('submitBtn');
   submitBtn.disabled = true;
   submitBtn.textContent = 'Submitting...';
