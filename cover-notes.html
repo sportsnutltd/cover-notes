@@ -729,19 +729,44 @@ async function submitForm() {
   if (!date) { alert('Please select a date.'); return; }
   if (!venue) { alert('Please select a venue.'); return; }
   
-  // Collect lessons
+  // Collect and validate lessons
   const lessons = [];
+  const errors = [];
+
   for (let i = 1; i <= lessonCount; i++) {
     if (!document.getElementById(`lesson-${i}`)) continue;
     const time = document.getElementById(`time-${i}`).value;
     const level = document.getElementById(`level-${i}`).value;
     const strength = document.getElementById(`strength-${i}`).value;
-    const notes = document.getElementById(`notes-${i}`).value;
-    
     const poolArea = document.getElementById(`poolArea-${i}`).value;
-    if (time || level || notes) {
+    const notes = document.getElementById(`notes-${i}`).value.trim();
+
+    // Skip completely empty lesson blocks
+    if (!time && !level && !strength && !poolArea && !notes) continue;
+
+    // Validate each field
+    const lessonErrors = [];
+    if (!time) lessonErrors.push('time');
+    if (!level) lessonErrors.push('level');
+    if (!poolArea) lessonErrors.push('pool area');
+    if (!strength) lessonErrors.push('class strength');
+    if (!notes) lessonErrors.push('cover notes');
+
+    if (lessonErrors.length > 0) {
+      errors.push(`Lesson ${lessons.length + 1}: please complete ${lessonErrors.join(', ')}`);
+    } else {
       lessons.push({ time, level, strength, poolArea, notes });
     }
+  }
+
+  if (lessons.length === 0 && errors.length === 0) {
+    alert('Please fill in at least one lesson before submitting.');
+    return;
+  }
+
+  if (errors.length > 0) {
+    alert('Please complete all required fields:\n\n' + errors.join('\n'));
+    return;
   }
   
   if (lessons.length === 0) { alert('Please fill in at least one lesson.'); return; }
