@@ -598,6 +598,16 @@ function addLesson() {
       </div>
     </div>
 
+    <div class="field" id="poolAreaField-${id}">
+      <label>Pool Area</label>
+      <div class="pool-auto-label" id="poolAreaDisplay-${id}">Select a level first</div>
+      <div class="pool-choice-buttons" id="poolAreaChoice-${id}" style="display:none">
+        <button class="pool-choice-btn" onclick="selectPoolChoice(${id},'DEEP WIDTH',this)">DEEP WIDTH</button>
+        <button class="pool-choice-btn" onclick="selectPoolChoice(${id},'ALONG WALL LENGTH',this)">ALONG WALL LENGTH</button>
+      </div>
+      <input type="hidden" id="poolArea-${id}">
+    </div>
+
     <div class="field">
       <label>Cover Notes</label>
       <textarea id="notes-${id}" placeholder="Notes about this class for the cover teacher..."></textarea>
