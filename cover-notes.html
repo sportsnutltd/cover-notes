@@ -769,6 +769,19 @@ function tryPreloadSchedule() {
   const schedule = getTeacherSchedule(teacher, date);
   if (!schedule.length) return;
 
+  // Set venue first so time pickers render correctly
+  const venueSelect = document.getElementById('venue');
+  if (schedule[0] && schedule[0].venue) {
+    const venueMap = {
+      'Davenies School': 'Davenies',
+      'Godstowe School': 'Godstowe'
+    };
+    const mapped = venueMap[schedule[0].venue] || schedule[0].venue;
+    if (!venueSelect.value) {
+      venueSelect.value = mapped;
+    }
+  }
+
   // Clear existing lesson blocks
   const container = document.getElementById('lessonsContainer');
   container.innerHTML = '';
@@ -807,17 +820,7 @@ function tryPreloadSchedule() {
     }, 150 * (idx + 1));  // stagger slightly so DOM is ready
   });
 
-  // Set venue from first entry if not already set
-  const venueSelect = document.getElementById('venue');
-  if (!venueSelect.value && schedule[0].venue) {
-    const venueMap = {
-      'Davenies School': 'Davenies',
-      'Godstowe School': 'Godstowe'
-    };
-    const mapped = venueMap[schedule[0].venue] || schedule[0].venue;
-    venueSelect.value = mapped;
-    refreshAllTimePickers();
-  }
+  // Venue and time pickers already set before lessons loaded — no reset needed
 }
 
 async function submitForm() {
