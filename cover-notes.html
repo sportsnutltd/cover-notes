@@ -587,6 +587,11 @@ teacherInput.addEventListener('input', () => {
       selectedTeacher = name;
       document.getElementById('teacherName').value = name;
       autocompleteList.style.display = 'none';
+      // Reset venue lock before preloading
+      const vs = document.getElementById('venue');
+      vs.disabled = false;
+      vs.style.background = '';
+      vs.style.color = '';
       tryPreloadSchedule();
     });
     autocompleteList.appendChild(div);
@@ -784,7 +789,7 @@ function tryPreloadSchedule() {
   const schedule = getTeacherSchedule(teacher, date);
   if (!schedule.length) return;
 
-  // Set venue first so time pickers render correctly
+  // Set and lock venue based on teacher's timetable
   const venueSelect = document.getElementById('venue');
   if (schedule[0] && schedule[0].venue) {
     const venueMap = {
@@ -792,9 +797,14 @@ function tryPreloadSchedule() {
       'Godstowe School': 'Godstowe'
     };
     const mapped = venueMap[schedule[0].venue] || schedule[0].venue;
-    if (!venueSelect.value) {
-      venueSelect.value = mapped;
-    }
+    venueSelect.value = mapped;
+    venueSelect.disabled = true;
+    venueSelect.style.background = '#f0f0f0';
+    venueSelect.style.color = '#444';
+  } else {
+    venueSelect.disabled = false;
+    venueSelect.style.background = '';
+    venueSelect.style.color = '';
   }
 
   // Clear existing lesson blocks
