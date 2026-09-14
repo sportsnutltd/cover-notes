@@ -775,22 +775,18 @@ function tryPreloadSchedule() {
   lessonCount = 0;
 
   // Add one block per scheduled lesson
-  schedule.forEach(entry => {
+  schedule.forEach((entry, idx) => {
     addLesson();
     const id = lessonCount;
 
-    // Pre-fill time
-    document.getElementById(`time-${id}`).value = entry.time;
-
-    // Pre-fill level
-    const levelSelect = document.getElementById(`level-${id}`);
-    levelSelect.value = entry.level;
-    updatePoolArea(id);
-
-    // Re-render time picker with correct time selected
+    // Re-render time picker first so buttons exist
     renderTimePicker(id);
-    // Select the correct time button
+
     setTimeout(() => {
+      // Set hidden time value
+      document.getElementById(`time-${id}`).value = entry.time;
+
+      // Highlight correct time button
       const timeGrid = document.getElementById(`timeGrid-${id}`);
       if (timeGrid) {
         const btns = timeGrid.querySelectorAll('.time-btn');
@@ -801,7 +797,14 @@ function tryPreloadSchedule() {
           }
         });
       }
-    }, 100);
+
+      // Pre-fill level and trigger pool area
+      const levelSelect = document.getElementById(`level-${id}`);
+      if (levelSelect) {
+        levelSelect.value = entry.level;
+        updatePoolArea(id);
+      }
+    }, 150 * (idx + 1));  // stagger slightly so DOM is ready
   });
 
   // Set venue from first entry if not already set
