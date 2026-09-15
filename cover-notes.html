@@ -901,8 +901,37 @@ async function submitForm() {
     });
     
     document.getElementById('successMsg').style.display = 'block';
-    submitBtn.style.display = 'none';
     window.scrollTo(0, 0);
+
+    // Reset form after 3 seconds so teacher can submit another day
+    setTimeout(() => {
+      // Reset session details
+      teacherInput.value = '';
+      document.getElementById('teacherName').value = '';
+      document.getElementById('lessonDate').value = '';
+      const vs = document.getElementById('venue');
+      vs.value = '';
+      vs.disabled = false;
+      vs.style.background = '';
+      vs.style.color = '';
+
+      // Reset lessons
+      document.getElementById('lessonsContainer').innerHTML = '';
+      lessonCount = 0;
+      addLesson();
+
+      // Hide success message and re-enable submit button
+      document.getElementById('successMsg').style.display = 'none';
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'SUBMIT COVER NOTES';
+
+      // Set date back to today
+      const today = new Date();
+      const yyyy = today.getFullYear();
+      const mm = String(today.getMonth() + 1).padStart(2, '0');
+      const dd = String(today.getDate()).padStart(2, '0');
+      document.getElementById('lessonDate').value = `${yyyy}-${mm}-${dd}`;
+    }, 3000);
   } catch (err) {
     document.getElementById('errorMsg').style.display = 'block';
     submitBtn.disabled = false;
