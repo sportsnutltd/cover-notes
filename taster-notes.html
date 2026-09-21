@@ -1,155 +1,484 @@
-/**
- * Sports Nut — Taster Notes Apps Script v2
- * Handles both POST (form submissions) and GET (Python data updates)
- */
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sports Nut — Taster Session Notes</title>
+<style>
+  :root {
+    --dark: #2B2B2B;
+    --red: #E8453C;
+    --blue: #41B8E8;
+    --white: #FFFFFF;
+    --light: #F5F5F5;
+    --border: #DDDDDD;
+    --radius: 8px;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    box-sizing: border-box;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Arial, sans-serif; background: #f0f2f5; color: var(--dark); }
 
-var SHEET_ID = '13EMpY-CQBrBCkxt9Zcc7LN8HGF-APv3SHA4wkWF6aYU';
-var EMAIL    = 'info@sports-nut.co.uk';
+  /* PASSWORD SCREEN */
+  #passwordScreen {
+    display: flex; align-items: center; justify-content: center;
+    min-height: 100vh; padding: 20px;
+  }
+  .password-box {
+    background: white; border-radius: var(--radius); padding: 40px;
+    max-width: 400px; width: 100%; text-align: center;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  }
+  .password-box img { width: 160px; margin-bottom: 20px; }
+  .password-box h2 { font-size: 20px; margin-bottom: 8px; }
+  .password-box p { color: #666; font-size: 14px; margin-bottom: 24px; }
+  .password-box input {
+    width: 100%; padding: 12px; border: 2px solid var(--border);
+    border-radius: var(--radius); font-size: 16px; margin-bottom: 12px;
+    text-align: center; letter-spacing: 2px;
+  }
+  .password-box button {
+    width: 100%; padding: 14px; background: var(--dark); color: white;
+    border: none; border-radius: var(--radius); font-size: 16px;
+    font-weight: bold; cursor: pointer;
+  }
+  .password-error { color: var(--red); font-size: 13px; margin-top: 8px; display: none; }
 
-function setupTasterSheet() {
-  var ss = SpreadsheetApp.openById(SHEET_ID);
+  /* MAIN FORM */
+  #mainForm { display: none; max-width: 680px; margin: 0 auto; padding: 20px; }
 
-  var active = ss.getSheetByName('Active Taster Notes') || ss.insertSheet('Active Taster Notes');
-  var headers = ['Timestamp','Teacher Name','Child Name','Venue','Day & Date','Time',
-                 'Suggested Level','Potential Fast Track?','Taster Notes','Added to Swimphony?'];
-  active.getRange(1,1,1,headers.length).setValues([headers])
-    .setBackground('#2B2B2B').setFontColor('#FFFFFF').setFontWeight('bold').setFontSize(11);
-  active.setFrozenRows(1);
-  active.getRange(2,10,500,1).insertCheckboxes();
-  [160,180,180,160,180,100,140,160,400,160].forEach(function(w,i){ active.setColumnWidth(i+1,w); });
+  .header {
+    background: var(--dark); color: white; border-radius: var(--radius);
+    padding: 20px; margin-bottom: 20px; display: flex;
+    align-items: center; gap: 16px;
+  }
+  .header img { height: 48px; }
+  .header-text h1 { font-size: 20px; }
+  .header-text p { font-size: 13px; opacity: 0.8; margin-top: 4px; }
 
-  var archive = ss.getSheetByName('Archive') || ss.insertSheet('Archive');
-  archive.getRange(1,1,1,headers.length).setValues([headers])
-    .setBackground('#444444').setFontColor('#FFFFFF').setFontWeight('bold').setFontSize(11);
-  archive.setFrozenRows(1);
-  archive.getRange(2,10,500,1).insertCheckboxes();
-  [160,180,180,160,180,100,140,160,400,160].forEach(function(w,i){ archive.setColumnWidth(i+1,w); });
+  .card {
+    background: white; border-radius: var(--radius); padding: 24px;
+    margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  }
+  .card h2 {
+    font-size: 14px; font-weight: bold; text-transform: uppercase;
+    letter-spacing: 1px; color: var(--blue); margin-bottom: 16px;
+    padding-bottom: 8px; border-bottom: 2px solid var(--blue);
+  }
 
-  var tasterData = ss.getSheetByName('Taster Data') || ss.insertSheet('Taster Data');
-  var tdHeaders = ['Child Name','Venue','Day','Date','Time','Last Updated'];
-  tasterData.getRange(1,1,1,tdHeaders.length).setValues([tdHeaders])
-    .setBackground('#41B8E8').setFontColor('#FFFFFF').setFontWeight('bold');
-  tasterData.setFrozenRows(1);
-  [200,160,120,160,100,180].forEach(function(w,i){ tasterData.setColumnWidth(i+1,w); });
+  .field { margin-bottom: 16px; }
+  .field:last-child { margin-bottom: 0; }
+  label {
+    display: block; font-size: 13px; font-weight: bold;
+    color: var(--dark); margin-bottom: 6px;
+  }
+  label .required { color: var(--red); margin-left: 2px; }
 
-  var sheet1 = ss.getSheetByName('Sheet1');
-  if (sheet1) ss.deleteSheet(sheet1);
+  select, input[type="text"], textarea {
+    width: 100%; padding: 12px; border: 2px solid var(--border);
+    border-radius: var(--radius); font-size: 15px; color: var(--dark);
+    background: white; transition: border-color 0.2s;
+    appearance: none; -webkit-appearance: none;
+  }
+  select:focus, input[type="text"]:focus, textarea:focus {
+    outline: none; border-color: var(--blue);
+  }
+  textarea { min-height: 120px; resize: vertical; font-family: Arial, sans-serif; }
 
-  Logger.log('Setup complete');
+  .auto-field {
+    background: #f8f9fa; border: 2px solid #e9ecef;
+    border-radius: var(--radius); padding: 12px;
+    font-size: 15px; color: #495057; min-height: 44px;
+    display: flex; align-items: center;
+  }
+  .auto-field.filled { background: #e8f5e9; border-color: #4caf50; color: var(--dark); }
+  .auto-field.loading { color: #999; font-style: italic; }
+
+  .override-link {
+    font-size: 12px; color: var(--blue); cursor: pointer;
+    text-decoration: underline; margin-top: 4px; display: inline-block;
+  }
+
+  /* Radio buttons for fast track */
+  .radio-group { display: flex; gap: 12px; }
+  .radio-option {
+    flex: 1; border: 2px solid var(--border); border-radius: var(--radius);
+    padding: 12px; text-align: center; cursor: pointer;
+    font-size: 15px; font-weight: bold; transition: all 0.2s;
+  }
+  .radio-option.yes { color: #1E7E34; }
+  .radio-option.no { color: #CC0000; }
+  .radio-option.selected.yes { background: #D4EDDA; border-color: #1E7E34; }
+  .radio-option.selected.no { background: #FFE0E0; border-color: #CC0000; }
+  input[type="radio"] { display: none; }
+
+  .submit-btn {
+    width: 100%; padding: 16px; background: var(--red); color: white;
+    border: none; border-radius: var(--radius); font-size: 17px;
+    font-weight: bold; cursor: pointer; margin-top: 8px;
+    transition: background 0.2s;
+  }
+  .submit-btn:hover { background: #c73530; }
+  .submit-btn:disabled { background: #ccc; cursor: not-allowed; }
+
+  .success-msg {
+    display: none; background: #D4EDDA; border: 2px solid #1E7E34;
+    border-radius: var(--radius); padding: 20px; text-align: center;
+    color: #1E7E34; font-weight: bold; font-size: 16px; margin-top: 16px;
+  }
+
+  .hint { font-size: 12px; color: #888; margin-top: 4px; font-style: italic; }
+</style>
+</head>
+<body>
+
+<!-- PASSWORD SCREEN -->
+<div id="passwordScreen">
+  <div class="password-box">
+    <img src="https://www.sports-nut.co.uk/wp-content/uploads/logo-color.webp" 
+         onerror="this.style.display='none'" alt="Sports Nut">
+    <h2>Sports Nut</h2>
+    <p>Taster Session Notes</p>
+    <input type="password" id="passwordInput" placeholder="Enter password" 
+           onkeydown="if(event.key==='Enter') checkPassword()">
+    <button onclick="checkPassword()">ENTER</button>
+    <div class="password-error" id="passwordError">Incorrect password — please try again</div>
+  </div>
+</div>
+
+<!-- MAIN FORM -->
+<div id="mainForm">
+  <div class="header">
+    <img src="https://www.sports-nut.co.uk/wp-content/uploads/logo-color.webp"
+         onerror="this.style.display='none'" alt="Sports Nut">
+    <div class="header-text">
+      <h1>Taster Session Notes</h1>
+      <p>Complete after each taster session</p>
+    </div>
+  </div>
+
+  <!-- SECTION 1: Teacher -->
+  <div class="card">
+    <h2>Teacher Details</h2>
+    <div class="field">
+      <label>Your Name <span class="required">*</span></label>
+      <select id="teacherName" onchange="onTeacherChange()">
+        <option value="">— Select your name —</option>
+        <option>Amina Imansoura</option>
+        <option>Chris Pollard</option>
+        <option>Christy Otway</option>
+        <option>Ellie Melrose</option>
+        <option>Emma Hamilton</option>
+        <option>Gabby Morris</option>
+        <option>Hannah Eddy</option>
+        <option>June Freebody</option>
+        <option>Kasia Jarmoszynska</option>
+        <option>Kate Ridden</option>
+        <option>Katie Hall</option>
+        <option>Karolyn Nailard</option>
+        <option>Korrie Ford</option>
+        <option>Laura Evans</option>
+        <option>Lindsey Collinson</option>
+        <option>Maisy Howard</option>
+        <option>Mark Tennant</option>
+        <option>Mecaela Allen</option>
+        <option>Norbert Mandic</option>
+        <option>Oliver Vine</option>
+        <option>Paige Morgan</option>
+        <option>Pippa Davie</option>
+        <option>Rachel Cornford</option>
+        <option>Rebecca Tennant</option>
+        <option>Rebekah Bradley</option>
+        <option>Reshaun Willis</option>
+        <option>Salil Kulkarni</option>
+        <option>Sian Lipscomb</option>
+        <option>Sophie Clayton</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- SECTION 2: Child -->
+  <div class="card">
+    <h2>Child Details</h2>
+    <div class="field">
+      <label>Child Name <span class="required">*</span></label>
+      <select id="childName" onchange="onChildChange()">
+        <option value="">— Select child name —</option>
+      </select>
+      <span class="override-link" onclick="toggleOverride('childOverride', 'childName')">
+        Can't find name? Enter manually
+      </span>
+      <input type="text" id="childOverride" placeholder="Type child name here"
+             style="display:none; margin-top:8px;">
+    </div>
+
+    <div class="field">
+      <label>Venue</label>
+      <div class="auto-field loading" id="venueField">Select a child to auto-fill</div>
+      <span class="override-link" onclick="toggleOverride('venueOverride', 'venueField')">
+        Override venue
+      </span>
+      <select id="venueOverride" style="display:none; margin-top:8px;">
+        <option value="">— Select venue —</option>
+        <option>Davenies School</option>
+        <option>Godstowe School</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label>Day &amp; Date</label>
+      <div class="auto-field loading" id="dayDateField">Select a child to auto-fill</div>
+      <span class="override-link" onclick="toggleOverride('dayDateOverride', 'dayDateField')">
+        Override day &amp; date
+      </span>
+      <input type="text" id="dayDateOverride" placeholder="e.g. Monday 21 September 2026"
+             style="display:none; margin-top:8px;">
+    </div>
+
+    <div class="field">
+      <label>Time</label>
+      <div class="auto-field loading" id="timeField">Select a child to auto-fill</div>
+      <span class="override-link" onclick="toggleOverride('timeOverride', 'timeField')">
+        Override time
+      </span>
+      <input type="text" id="timeOverride" placeholder="e.g. 16:30"
+             style="display:none; margin-top:8px;">
+    </div>
+  </div>
+
+  <!-- SECTION 3: Assessment -->
+  <div class="card">
+    <h2>Assessment</h2>
+    <div class="field">
+      <label>Suggested Level <span class="required">*</span></label>
+      <select id="suggestedLevel">
+        <option value="">— Select suggested level —</option>
+        <option>L1</option>
+        <option>L2</option>
+        <option>L3</option>
+        <option>L4</option>
+        <option>L5</option>
+        <option>L6</option>
+        <option>L7</option>
+        <option>L8</option>
+        <option>Squad</option>
+        <option>Elite Squad</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label>Potential Fast Track? <span class="required">*</span></label>
+      <div class="radio-group">
+        <label class="radio-option yes" id="ftYes" onclick="selectFastTrack('Yes')">
+          <input type="radio" name="fastTrack" value="Yes"> ⚡ Yes
+        </label>
+        <label class="radio-option no" id="ftNo" onclick="selectFastTrack('No')">
+          <input type="radio" name="fastTrack" value="No"> No
+        </label>
+      </div>
+      <input type="hidden" id="fastTrackValue">
+    </div>
+
+    <div class="field">
+      <label>Taster Notes <span class="required">*</span></label>
+      <textarea id="tasterNotes" 
+        placeholder="Describe the child's swimming ability, confidence in the water, areas to work on and any other relevant observations..."></textarea>
+      <div class="hint">Tip: Tap the microphone on your keyboard to dictate notes hands-free</div>
+    </div>
+  </div>
+
+  <button class="submit-btn" id="submitBtn" onclick="submitForm()">SUBMIT TASTER NOTES</button>
+  <div class="success-msg" id="successMsg">
+    ✓ Taster notes submitted successfully! The form will reset shortly.
+  </div>
+</div>
+
+<script>
+const PASSWORD = 'SportsNut2026';
+const TASTER_SHEET_ID = '13EMpY-CQBrBCkxt9Zcc7LN8HGF-APv3SHA4wkWF6aYU';
+const APPS_SCRIPT_URL = 'REPLACE_WITH_APPS_SCRIPT_URL';
+
+let tasterData = [];
+let fastTrackSelected = '';
+
+// ── PASSWORD ──────────────────────────────────────────────────────────────
+function checkPassword() {
+  const val = document.getElementById('passwordInput').value;
+  if (val === PASSWORD) {
+    document.getElementById('passwordScreen').style.display = 'none';
+    document.getElementById('mainForm').style.display = 'block';
+    loadTasterData();
+  } else {
+    document.getElementById('passwordError').style.display = 'block';
+  }
 }
 
-// ── GET HANDLER (called by Python script) ─────────────────────────────────────
-function doGet(e) {
+// ── LOAD TASTER DATA FROM GOOGLE SHEET ───────────────────────────────────
+async function loadTasterData() {
   try {
-    if (e.parameter.data) {
-      var data = JSON.parse(decodeURIComponent(e.parameter.data));
-      if (data.action === 'updateTasterData') {
-        updateTasterData(data);
-        return ContentService.createTextOutput('OK').setMimeType(ContentService.MimeType.TEXT);
-      }
-    }
-    return ContentService.createTextOutput('Sports Nut Taster Notes API').setMimeType(ContentService.MimeType.TEXT);
-  } catch(err) {
-    return ContentService.createTextOutput('Error: ' + err.toString()).setMimeType(ContentService.MimeType.TEXT);
+    const url = `https://docs.google.com/spreadsheets/d/${TASTER_SHEET_ID}/gviz/tq?tqx=out:json&sheet=Taster%20Data`;
+    const resp = await fetch(url);
+    const text = await resp.text();
+    const json = JSON.parse(text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1));
+    const rows = json.table.rows;
+
+    tasterData = rows.slice(1).map(row => ({
+      name:    row.c[0]?.v || '',
+      venue:   row.c[1]?.v || '',
+      day:     row.c[2]?.v || '',
+      date:    row.c[3]?.v || '',
+      time:    row.c[4]?.v || '',
+    })).filter(r => r.name);
+
+    // Populate child dropdown
+    const select = document.getElementById('childName');
+    select.innerHTML = '<option value="">— Select child name —</option>';
+    tasterData.forEach(child => {
+      const opt = document.createElement('option');
+      opt.value = child.name;
+      opt.textContent = child.name;
+      select.appendChild(opt);
+    });
+
+    console.log(`Taster data loaded: ${tasterData.length} children`);
+  } catch(e) {
+    console.warn('Could not load taster data:', e);
+    document.getElementById('childName').innerHTML = 
+      '<option value="">— No taster data available —</option>';
   }
 }
 
-// ── POST HANDLER (called by form) ─────────────────────────────────────────────
-function doPost(e) {
+// ── CHILD SELECTION ───────────────────────────────────────────────────────
+function onChildChange() {
+  const name = document.getElementById('childName').value;
+  const child = tasterData.find(c => c.name === name);
+
+  if (child) {
+    setAutoField('venueField', child.venue);
+    setAutoField('dayDateField', `${child.day} ${child.date}`);
+    setAutoField('timeField', child.time);
+  } else {
+    resetAutoField('venueField');
+    resetAutoField('dayDateField');
+    resetAutoField('timeField');
+  }
+}
+
+function setAutoField(id, value) {
+  const el = document.getElementById(id);
+  el.textContent = value || '—';
+  el.className = value ? 'auto-field filled' : 'auto-field';
+}
+
+function resetAutoField(id) {
+  const el = document.getElementById(id);
+  el.textContent = 'Select a child to auto-fill';
+  el.className = 'auto-field loading';
+}
+
+function toggleOverride(overrideId, autoFieldId) {
+  const override = document.getElementById(overrideId);
+  const isHidden = override.style.display === 'none';
+  override.style.display = isHidden ? 'block' : 'none';
+  if (isHidden) override.focus();
+}
+
+function onTeacherChange() { /* placeholder for future use */ }
+
+// ── FAST TRACK ────────────────────────────────────────────────────────────
+function selectFastTrack(val) {
+  fastTrackSelected = val;
+  document.getElementById('fastTrackValue').value = val;
+  document.getElementById('ftYes').classList.toggle('selected', val === 'Yes');
+  document.getElementById('ftNo').classList.toggle('selected', val === 'No');
+}
+
+// ── SUBMIT ────────────────────────────────────────────────────────────────
+async function submitForm() {
+  const teacher = document.getElementById('teacherName').value;
+  const childDropdown = document.getElementById('childName').value;
+  const childOverride = document.getElementById('childOverride').value.trim();
+  const child = childOverride || childDropdown;
+
+  const venueAuto = document.getElementById('venueField').textContent;
+  const venueOverride = document.getElementById('venueOverride').value;
+  const venue = venueOverride || (venueAuto !== 'Select a child to auto-fill' ? venueAuto : '');
+
+  const dayDateAuto = document.getElementById('dayDateField').textContent;
+  const dayDateOverride = document.getElementById('dayDateOverride').value.trim();
+  const dayDate = dayDateOverride || (dayDateAuto !== 'Select a child to auto-fill' ? dayDateAuto : '');
+
+  const timeAuto = document.getElementById('timeField').textContent;
+  const timeOverride = document.getElementById('timeOverride').value.trim();
+  const time = timeOverride || (timeAuto !== 'Select a child to auto-fill' ? timeAuto : '');
+
+  const level = document.getElementById('suggestedLevel').value;
+  const fastTrack = fastTrackSelected;
+  const notes = document.getElementById('tasterNotes').value.trim();
+
+  // Validate
+  const errors = [];
+  if (!teacher) errors.push('Please select your name');
+  if (!child) errors.push('Please select or enter a child name');
+  if (!level) errors.push('Please select a suggested level');
+  if (!fastTrack) errors.push('Please select Potential Fast Track? Yes or No');
+  if (!notes) errors.push('Please enter taster notes');
+
+  if (errors.length > 0) {
+    alert('Please complete all required fields:\n\n' + errors.join('\n'));
+    return;
+  }
+
+  const submitBtn = document.getElementById('submitBtn');
+  submitBtn.disabled = true;
+  submitBtn.textContent = 'Submitting...';
+
+  const payload = { teacher, child, venue, dayDate, time, level, fastTrack, notes };
+
   try {
-    var data = JSON.parse(e.postData.contents);
-    if (data.action === 'updateTasterData') {
-      updateTasterData(data);
-      return ContentService.createTextOutput('OK').setMimeType(ContentService.MimeType.TEXT);
-    }
-    return saveTasterNote(data);
-  } catch(err) {
-    return ContentService.createTextOutput('Error: ' + err.toString()).setMimeType(ContentService.MimeType.TEXT);
-  }
-}
-
-// ── SAVE TASTER NOTE ──────────────────────────────────────────────────────────
-function saveTasterNote(data) {
-  var ss = SpreadsheetApp.openById(SHEET_ID);
-  var active = ss.getSheetByName('Active Taster Notes');
-  var timestamp = new Date().toLocaleString('en-GB');
-
-  var row = [timestamp, data.teacher||'', data.child||'', data.venue||'',
-             data.dayDate||'', data.time||'', data.level||'',
-             data.fastTrack||'', data.notes||'', false];
-
-  var lastRow = active.getLastRow();
-  active.getRange(lastRow+1, 1, 1, row.length).setValues([row]);
-  active.getRange(lastRow+1, 10, 1, 1).insertCheckboxes();
-  active.getRange(lastRow+1, 10, 1, 1).setValue(false);
-  active.getRange(lastRow+1, 10, 1, 1).setBackground('#FFF9E6');
-  var bg = (lastRow % 2 === 0) ? '#F5F5F5' : '#FFFFFF';
-  active.getRange(lastRow+1, 1, 1, 9).setBackground(bg);
-
-  var subject = 'Sports Nut — New Taster Session Note: ' + (data.child||'Unknown');
-  var body = 'A new taster session note has been submitted.\n\n' +
-    'Teacher: ' + (data.teacher||'') + '\n' +
-    'Child: ' + (data.child||'') + '\n' +
-    'Venue: ' + (data.venue||'') + '\n' +
-    'Day & Date: ' + (data.dayDate||'') + '\n' +
-    'Time: ' + (data.time||'') + '\n' +
-    'Suggested Level: ' + (data.level||'') + '\n' +
-    'Potential Fast Track?: ' + (data.fastTrack||'') + '\n\n' +
-    'Notes:\n' + (data.notes||'') + '\n\n' +
-    'View: https://docs.google.com/spreadsheets/d/' + SHEET_ID;
-
-  GmailApp.sendEmail(EMAIL, subject, body);
-  return ContentService.createTextOutput('OK').setMimeType(ContentService.MimeType.TEXT);
-}
-
-// ── UPDATE TASTER DATA ────────────────────────────────────────────────────────
-function updateTasterData(data) {
-  var ss = SpreadsheetApp.openById(SHEET_ID);
-  var tasterSheet = ss.getSheetByName('Taster Data');
-  var lastRow = tasterSheet.getLastRow();
-  if (lastRow > 1) tasterSheet.getRange(2, 1, lastRow-1, 6).clearContent();
-
-  if (data.tasters && data.tasters.length > 0) {
-    var rows = data.tasters.map(function(t) {
-      return [t.name, t.venue, t.day, t.date, t.time, data.updatedAt||''];
+    await fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
     });
-    tasterSheet.getRange(2, 1, rows.length, 6).setValues(rows);
-    rows.forEach(function(_, i) {
-      tasterSheet.getRange(i+2, 1, 1, 6).setBackground(i%2===0 ? '#F5F5F5' : '#FFFFFF');
-    });
+
+    document.getElementById('successMsg').style.display = 'block';
+    window.scrollTo(0, 0);
+
+    // Reset after 3 seconds
+    setTimeout(() => {
+      document.getElementById('teacherName').value = '';
+      document.getElementById('childName').value = '';
+      document.getElementById('childOverride').value = '';
+      document.getElementById('childOverride').style.display = 'none';
+      document.getElementById('venueOverride').value = '';
+      document.getElementById('venueOverride').style.display = 'none';
+      document.getElementById('dayDateOverride').value = '';
+      document.getElementById('dayDateOverride').style.display = 'none';
+      document.getElementById('timeOverride').value = '';
+      document.getElementById('timeOverride').style.display = 'none';
+      resetAutoField('venueField');
+      resetAutoField('dayDateField');
+      resetAutoField('timeField');
+      document.getElementById('suggestedLevel').value = '';
+      fastTrackSelected = '';
+      document.getElementById('ftYes').classList.remove('selected');
+      document.getElementById('ftNo').classList.remove('selected');
+      document.getElementById('fastTrackValue').value = '';
+      document.getElementById('tasterNotes').value = '';
+      document.getElementById('successMsg').style.display = 'none';
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'SUBMIT TASTER NOTES';
+    }, 3000);
+
+  } catch(e) {
+    alert('Submission failed — please check your connection and try again.');
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'SUBMIT TASTER NOTES';
   }
 }
-
-// ── CHECKBOX TRIGGER ──────────────────────────────────────────────────────────
-function onEdit(e) {
-  var ss = SpreadsheetApp.getActiveSpreadsheet();
-  var sheet = e.range.getSheet();
-  var col = e.range.getColumn();
-  var row = e.range.getRow();
-  if (col !== 10 || row === 1) return;
-
-  var active  = ss.getSheetByName('Active Taster Notes');
-  var archive = ss.getSheetByName('Archive');
-
-  if (sheet.getName() === 'Active Taster Notes' && e.value === 'TRUE') {
-    var rowData = active.getRange(row, 1, 1, 10).getValues()[0];
-    var lastArchiveRow = archive.getLastRow();
-    archive.getRange(lastArchiveRow+1, 1, 1, 10).setValues([rowData]);
-    archive.getRange(lastArchiveRow+1, 10, 1, 1).insertCheckboxes();
-    archive.getRange(lastArchiveRow+1, 10, 1, 1).setValue(true);
-    archive.getRange(lastArchiveRow+1, 1, 1, 9).setBackground(lastArchiveRow%2===0 ? '#F0F0F0' : '#E8E8E8');
-    active.deleteRow(row);
-  }
-
-  if (sheet.getName() === 'Archive' && e.value === 'FALSE') {
-    var rowData = archive.getRange(row, 1, 1, 10).getValues()[0];
-    rowData[9] = false;
-    var lastActiveRow = active.getLastRow();
-    active.getRange(lastActiveRow+1, 1, 1, 10).setValues([rowData]);
-    active.getRange(lastActiveRow+1, 10, 1, 1).insertCheckboxes();
-    active.getRange(lastActiveRow+1, 10, 1, 1).setValue(false);
-    active.getRange(lastActiveRow+1, 10, 1, 1).setBackground('#FFF9E6');
-    active.getRange(lastActiveRow+1, 1, 1, 9).setBackground(lastActiveRow%2===0 ? '#F5F5F5' : '#FFFFFF');
-    archive.deleteRow(row);
-  }
-}
+</script>
+</body>
+</html>
