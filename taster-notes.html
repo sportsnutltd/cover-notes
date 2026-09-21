@@ -323,12 +323,58 @@ async function loadTasterData() {
     const json = JSON.parse(text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1));
     const rows = json.table.rows;
 
+    function cleanVal(cell) {
+      if (!cell) return '';
+      // Handle Date() objects from gviz
+      const v = cell.v || '';
+      const f = cell.f || '';
+      if (f) return f;  // Use formatted value if available
+      if (typeof v === 'string') return v;
+      // Handle Date objects
+      if (v && typeof v === 'object' && v.constructor && v.constructor.name) {
+        const d = new Date(v);
+        if (!isNaN(d)) return d.toLocaleDateString('en-GB');
+      }
+      return String(v);
+    }
+
+    function cleanTime(cell) {
+      if (!cell) return '';
+      const f = cell.f || '';
+      if (f && f.includes(':')) return f;
+      const v = cell.v || '';
+      if (typeof v === 'string' && v.includes(':')) return v;
+      // xlrd time as fraction
+      if (typeof v === 'number' && v < 1) {
+        const totalMins = Math.round(v * 24 * 60);
+        const h = Math.floor(totalMins / 60).toString().padStart(2,'0');
+        const m = (totalMins % 60).toString().padStart(2,'0');
+        return h + ':' + m;
+      }
+      return String(v);
+    }
+
+    function cleanDate(cell) {
+      if (!cell) return '';
+      const f = cell.f || '';
+      if (f) return f;
+      const v = cell.v || '';
+      if (typeof v === 'string' && !v.startsWith('Date(')) return v;
+      // Parse Date(YYYY,M,D) format — months are 0-indexed
+      const match = String(v).match(/Date\((\d+),(\d+),(\d+)/);
+      if (match) {
+        const d = new Date(parseInt(match[1]), parseInt(match[2]), parseInt(match[3]));
+        return d.toLocaleDateString('en-GB', {day:'numeric', month:'long', year:'numeric'});
+      }
+      return String(v);
+    }
+
     tasterData = rows.slice(1).map(row => ({
-      name:    row.c[0]?.v || '',
-      venue:   row.c[1]?.v || '',
-      day:     row.c[2]?.v || '',
-      date:    row.c[3]?.v || '',
-      time:    row.c[4]?.v || '',
+      name:    cleanVal(row.c[0]),
+      venue:   cleanVal(row.c[1]),
+      day:     cleanVal(row.c[2]),
+      date:    cleanDate(row.c[3]),
+      time:    cleanTime(row.c[4]),
     })).filter(r => r.name);
 
     // Populate child dropdown
