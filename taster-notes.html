@@ -560,16 +560,17 @@ async function submitForm() {
 
   const payload = { teacher, child, venue, dayDate, time, level, fastTrack, notes, frontCrawl, backCrawl };
 
+  // Show success immediately — don't wait for server response
+  document.getElementById('successMsg').style.display = 'block';
+  window.scrollTo(0, 0);
+
   try {
-    await fetch(APPS_SCRIPT_URL, {
+    fetch(APPS_SCRIPT_URL, {
       method: 'POST',
       mode: 'no-cors',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     });
-
-    document.getElementById('successMsg').style.display = 'block';
-    window.scrollTo(0, 0);
 
     // Reset after 3 seconds
     setTimeout(() => {
@@ -592,6 +593,10 @@ async function submitForm() {
       document.getElementById('ftNo').classList.remove('selected');
       document.getElementById('fastTrackValue').value = '';
       document.getElementById('tasterNotes').value = '';
+      document.getElementById('suggestedLevel').value = '';
+      document.getElementById('frontCrawlTime').value = '';
+      document.getElementById('backCrawlTime').value = '';
+      document.getElementById('swimTimesSection').style.display = 'none';
       document.getElementById('successMsg').style.display = 'none';
       submitBtn.disabled = false;
       submitBtn.textContent = 'SUBMIT TASTER NOTES';
