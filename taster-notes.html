@@ -539,11 +539,14 @@ async function submitForm() {
   if (!fastTrack) errors.push('Please select Potential Fast Track? Yes or No');
   if (!notes) errors.push('Please enter taster notes');
 
+  const frontCrawl = document.getElementById('frontCrawlTime').value;
+  const backCrawl = document.getElementById('backCrawlTime').value;
+
   // Validate swim times if L5+ or Squad selected
   const swimLevels = ['L5','L6','L7','L8','Squad'];
   if (swimLevels.includes(level)) {
-    if (!frontCrawl) errors.push('Please select a Front Crawl time');
-    if (!backCrawl) errors.push('Please select a Back Crawl time');
+    if (!frontCrawl) errors.push('Please select a Front Crawl 1 Length time');
+    if (!backCrawl) errors.push('Please select a Back Crawl 1 Length time');
   }
 
   if (errors.length > 0) {
@@ -555,8 +558,6 @@ async function submitForm() {
   submitBtn.disabled = true;
   submitBtn.textContent = 'Submitting...';
 
-  const frontCrawl = document.getElementById('frontCrawlTime').value;
-  const backCrawl = document.getElementById('backCrawlTime').value;
   const payload = { teacher, child, venue, dayDate, time, level, fastTrack, notes, frontCrawl, backCrawl };
 
   try {
