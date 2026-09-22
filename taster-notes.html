@@ -279,6 +279,26 @@
       </select>
     </div>
 
+    <!-- SWIM TIMES — only shown for L5+ and Squad -->
+    <div class="field" id="swimTimesSection" style="display:none;">
+      <div style="background:#EBF5FB; border:2px solid #41B8E8; border-radius:8px; padding:16px; margin-bottom:16px;">
+        <div style="font-weight:bold; color:#41B8E8; margin-bottom:4px; font-size:14px;">⏱ SWIM TIMES</div>
+        <div style="font-size:12px; color:#666; font-style:italic; margin-bottom:12px;">Please enter their front crawl and back crawl 1 length time or pick Not Recorded if you didn't get the times.</div>
+        <div class="field">
+          <label>Front Crawl 1 Length Time <span class="required">*</span></label>
+          <select id="frontCrawlTime">
+            <option value="">— Select front crawl time —</option>
+          </select>
+        </div>
+        <div class="field" style="margin-bottom:0;">
+          <label>Back Crawl 1 Length Time <span class="required">*</span></label>
+          <select id="backCrawlTime">
+            <option value="">— Select back crawl time —</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
     <div class="field">
       <label>Potential Fast Track? <span class="required">*</span></label>
       <div class="radio-group">
@@ -444,6 +464,42 @@ function toggleOverride(overrideId, autoFieldId) {
 
 function onTeacherChange() { /* placeholder for future use */ }
 
+// Populate swim time dropdowns (10-80 seconds, 1 second increments)
+function populateSwimTimeDropdowns() {
+  ['frontCrawlTime', 'backCrawlTime'].forEach(function(id) {
+    var sel = document.getElementById(id);
+    // Not Recorded option first
+    var notRecorded = document.createElement('option');
+    notRecorded.value = 'Not Recorded';
+    notRecorded.textContent = 'Not Recorded';
+    sel.appendChild(notRecorded);
+    // 10-55 seconds in 1 second increments
+    for (var s = 10; s <= 55; s++) {
+      var opt = document.createElement('option');
+      opt.value = s;
+      opt.textContent = s + 's';
+      sel.appendChild(opt);
+    }
+    // 56+ as last option
+    var plus = document.createElement('option');
+    plus.value = '56+';
+    plus.textContent = '56+s';
+    sel.appendChild(plus);
+  });
+}
+populateSwimTimeDropdowns();
+
+// Show swim times section for L5, L6, L7, L8, Squad
+document.getElementById('suggestedLevel').addEventListener('change', function() {
+  var level = this.value;
+  var showTimes = ['L5','L6','L7','L8','Squad'].includes(level);
+  document.getElementById('swimTimesSection').style.display = showTimes ? 'block' : 'none';
+  if (!showTimes) {
+    document.getElementById('frontCrawlTime').value = '';
+    document.getElementById('backCrawlTime').value = '';
+  }
+});
+
 // ── FAST TRACK ────────────────────────────────────────────────────────────
 function selectFastTrack(val) {
   fastTrackSelected = val;
@@ -483,6 +539,13 @@ async function submitForm() {
   if (!fastTrack) errors.push('Please select Potential Fast Track? Yes or No');
   if (!notes) errors.push('Please enter taster notes');
 
+  // Validate swim times if L5+ or Squad selected
+  const swimLevels = ['L5','L6','L7','L8','Squad'];
+  if (swimLevels.includes(level)) {
+    if (!frontCrawl) errors.push('Please select a Front Crawl time');
+    if (!backCrawl) errors.push('Please select a Back Crawl time');
+  }
+
   if (errors.length > 0) {
     alert('Please complete all required fields:\n\n' + errors.join('\n'));
     return;
@@ -492,7 +555,9 @@ async function submitForm() {
   submitBtn.disabled = true;
   submitBtn.textContent = 'Submitting...';
 
-  const payload = { teacher, child, venue, dayDate, time, level, fastTrack, notes };
+  const frontCrawl = document.getElementById('frontCrawlTime').value;
+  const backCrawl = document.getElementById('backCrawlTime').value;
+  const payload = { teacher, child, venue, dayDate, time, level, fastTrack, notes, frontCrawl, backCrawl };
 
   try {
     await fetch(APPS_SCRIPT_URL, {
