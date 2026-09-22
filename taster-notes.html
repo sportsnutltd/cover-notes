@@ -401,7 +401,7 @@ async function loadTasterData() {
       return String(v);
     }
 
-    tasterData = rows.slice(1).map(row => ({
+    tasterData = rows.map(row => ({
       name:    cleanVal(row.c[0]),
       venue:   cleanVal(row.c[1]),
       day:     cleanVal(row.c[2]),
