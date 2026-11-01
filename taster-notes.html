@@ -3,6 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="icon" type="image/png" href="taster-favicon.png">
+<link rel="apple-touch-icon" href="taster-apple-touch-icon.png">
+<link rel="manifest" href="taster-manifest.json">
+<meta name="theme-color" content="#1F2A44">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Taster Notes">
 <title>Sports Nut — Taster Session Notes</title>
 <style>
   :root {
@@ -149,11 +156,11 @@
 <!-- PASSWORD SCREEN -->
 <div id="passwordScreen">
   <div class="password-box">
-    <img src="https://www.sports-nut.co.uk/wp-content/uploads/logo-color.webp" 
+    <img src="https://www.sports-nut.co.uk/wp-content/uploads/logo-color.webp"
          onerror="this.style.display='none'" alt="Sports Nut">
     <h2>Sports Nut</h2>
     <p>Taster Session Notes</p>
-    <input type="password" id="passwordInput" placeholder="Enter password" 
+    <input type="password" id="passwordInput" placeholder="Enter password"
            onkeydown="if(event.key==='Enter') checkPassword()">
     <button onclick="checkPassword()">ENTER</button>
     <div class="password-error" id="passwordError">Incorrect password — please try again</div>
@@ -314,7 +321,7 @@
 
     <div class="field">
       <label>Taster Notes <span class="required">*</span></label>
-      <textarea id="tasterNotes" 
+      <textarea id="tasterNotes"
         placeholder="Describe the child's swimming ability, confidence in the water, areas to work on and any other relevant observations..."></textarea>
       <div class="hint">Tip: Tap the microphone on your keyboard to dictate notes hands-free</div>
     </div>
@@ -422,7 +429,7 @@ async function loadTasterData() {
     console.log(`Taster data loaded: ${tasterData.length} children`);
   } catch(e) {
     console.warn('Could not load taster data:', e);
-    document.getElementById('childName').innerHTML = 
+    document.getElementById('childName').innerHTML =
       '<option value="">— No taster data available —</option>';
   }
 }
