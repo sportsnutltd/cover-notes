@@ -1,9 +1,8 @@
 {
-  "id": "cover-notes.html",
   "name": "Sports Nut Cover Notes",
   "short_name": "Cover Notes",
-  "start_url": "cover-notes.html",
-  "scope": "cover-notes.html",
+  "start_url": "./",
+  "scope": "./",
   "display": "standalone",
   "background_color": "#1F2A44",
   "theme_color": "#1F2A44",
