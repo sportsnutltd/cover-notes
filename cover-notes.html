@@ -3,10 +3,17 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/png" href="cover-favicon.png">
+<link rel="apple-touch-icon" href="cover-apple-touch-icon.png">
+<link rel="manifest" href="cover-manifest.json">
+<meta name="theme-color" content="#1F2A44">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Cover Notes">
 <title>Sports Nut — Cover Notes</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  
+
   body {
     font-family: 'Arial', sans-serif;
     background: #1a1a1a;
@@ -413,7 +420,7 @@
   <div class="password-card">
     <h2>Sports Nut</h2>
     <p>Cover Notes — Staff Access Only</p>
-    <input type="password" id="passwordInput" placeholder="Enter password" 
+    <input type="password" id="passwordInput" placeholder="Enter password"
            onkeydown="if(event.key==='Enter')checkPassword()">
     <button onclick="checkPassword()">ACCESS FORM</button>
     <div class="password-error" id="passwordError">Incorrect password. Please try again.</div>
@@ -518,7 +525,7 @@ function getTeacherSchedule(teacherName, dateStr) {
   const d = new Date(dateStr + 'T00:00:00');
   const dayName = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][d.getDay()];
   return timetableData.filter(r =>
-    r.teacher.toLowerCase() === teacherName.toLowerCase() && 
+    r.teacher.toLowerCase() === teacherName.toLowerCase() &&
     r.day.toLowerCase() === dayName.toLowerCase()
   ).sort((a, b) => a.time.localeCompare(b.time));
 }
@@ -574,10 +581,10 @@ teacherInput.addEventListener('input', () => {
   const val = teacherInput.value.toLowerCase();
   autocompleteList.innerHTML = '';
   if (!val) { autocompleteList.style.display = 'none'; return; }
-  
+
   const matches = TEACHERS.filter(t => t.toLowerCase().includes(val));
   if (matches.length === 0) { autocompleteList.style.display = 'none'; return; }
-  
+
   matches.forEach(name => {
     const div = document.createElement('div');
     div.className = 'autocomplete-item';
@@ -610,13 +617,13 @@ function addLesson() {
   lessonCount++;
   const id = lessonCount;
   const container = document.getElementById('lessonsContainer');
-  
+
   const block = document.createElement('div');
   block.className = 'lesson-block';
   block.id = `lesson-${id}`;
   block.innerHTML = `
     <div class="lesson-num">LESSON ${id}</div>
-    
+
     <div class="field">
       <label>Time</label>
       <div class="time-grid" id="timeGrid-${id}">
@@ -659,7 +666,7 @@ function addLesson() {
       <textarea id="notes-${id}" placeholder="Notes about this class for the cover teacher..."></textarea>
     </div>
   `;
-  
+
   container.appendChild(block);
   renderTimePicker(id);
 }
@@ -682,21 +689,21 @@ function renderTimePicker(id) {
   const day = getSelectedDay();
   const grid = document.getElementById(`timeGrid-${id}`);
   const currentTime = document.getElementById(`time-${id}`).value;
-  
+
   if (!venue || !day) {
     grid.innerHTML = '<div class="no-times">Select venue and date first</div>';
     return;
   }
-  
+
   const times = (TIMES[venue] && TIMES[venue][day]) ? TIMES[venue][day] : null;
-  
+
   if (!times) {
     grid.innerHTML = `<div class="no-times">No lessons at ${venue} on ${day}</div>`;
     return;
   }
-  
+
   grid.innerHTML = times.map(t => `
-    <button class="time-btn${t === currentTime ? ' active' : ''}" 
+    <button class="time-btn${t === currentTime ? ' active' : ''}"
             onclick="selectTime(${id},'${t}',this)">${t}</button>
   `).join('');
 }
@@ -841,11 +848,11 @@ async function submitForm() {
   const teacher = document.getElementById('teacherName').value || teacherInput.value;
   const date = document.getElementById('lessonDate').value;
   const venue = document.getElementById('venue').value;
-  
+
   if (!teacher) { alert('Please select your name.'); return; }
   if (!date) { alert('Please select a date.'); return; }
   if (!venue) { alert('Please select a venue.'); return; }
-  
+
   // Collect and validate lessons
   const lessons = [];
   const errors = [];
@@ -885,13 +892,13 @@ async function submitForm() {
     alert('Please complete all required fields:\n\n' + errors.join('\n'));
     return;
   }
-  
+
   const submitBtn = document.getElementById('submitBtn');
   submitBtn.disabled = true;
   submitBtn.textContent = 'Submitting...';
-  
+
   const payload = { teacher, date, venue, lessons };
-  
+
   try {
     await fetch(SCRIPT_URL, {
       method: 'POST',
@@ -899,7 +906,7 @@ async function submitForm() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     });
-    
+
     document.getElementById('successMsg').style.display = 'block';
     window.scrollTo(0, 0);
 
