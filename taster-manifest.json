@@ -1,8 +1,9 @@
 {
+  "id": "taster-notes.html",
   "name": "Sports Nut Taster Notes",
   "short_name": "Taster Notes",
   "start_url": "taster-notes.html",
-  "scope": "./",
+  "scope": "taster-notes.html",
   "display": "standalone",
   "background_color": "#1F2A44",
   "theme_color": "#1F2A44",
