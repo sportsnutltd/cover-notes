@@ -485,7 +485,8 @@
 
 <script>
 // ── DATA ──────────────────────────────────────────────────────────────────────
-const TEACHERS = [
+// Fallback list - the names normally come from the timetable sheet (kept up to date from Swimphony)
+let TEACHERS = [
   "Amina Imansoura","Chris Pollard","Christy Otway","Ellie Melrose",
   "Emma Hamilton","Gabby Morris","Hannah Eddy","June Freebody",
   "Kasia Jarmoszynska","Kate Ridden","Katie Hall","Karolyn Nailard",
@@ -515,6 +516,9 @@ async function loadTimetable() {
       level:   row.c[4]?.v || '',
     }));
     console.log(`Timetable loaded: ${timetableData.length} entries`);
+    // Teacher names come from the timetable, spelt exactly as in Swimphony
+    const names = [...new Set(timetableData.map(r => String(r.teacher).trim()).filter(Boolean))].sort((a, b) => a.localeCompare(b));
+    if (names.length >= 5) TEACHERS = names;
   } catch(e) {
     console.warn('Could not load timetable:', e);
   }
